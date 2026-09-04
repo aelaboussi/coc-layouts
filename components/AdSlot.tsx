@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { siteConfig } from "@/lib/site-config";
+
 const SIZES = {
   banner: { w: "100%", h: "90px", label: "728 × 90 Leaderboard" },
   rectangle: { w: "100%", h: "250px", label: "300 × 250 Medium Rectangle" },
@@ -8,11 +13,19 @@ const SIZES = {
 
 export type AdSlotSize = keyof typeof SIZES;
 
+declare global {
+  interface Window {
+    adsbygoogle?: Record<string, unknown>[];
+  }
+}
+
 /**
- * Reserved ad placement. Purely a visual placeholder today — swap the inner
- * div for your <ins class="adsbygoogle" ...> unit (or any other network)
- * once you're ready to turn ads on. Keeping slots as their own component
- * means that's a one-file change everywhere on the site.
+ * Reserved ad placement. Renders a real AdSense unit once both
+ * `siteConfig.adsenseClientId` (the loader script in app/layout.tsx) and
+ * this size's slot ID (lib/site-config.ts's `adsenseSlots`) are set — until
+ * then it falls back to a visual placeholder, so placements can be turned
+ * on individually as you create each ad unit in your AdSense account,
+ * rather than all-or-nothing.
  */
 export default function AdSlot({
   size = "rectangle",
@@ -24,6 +37,35 @@ export default function AdSlot({
   label?: string;
 }) {
   const spec = SIZES[size];
+  const slotId = siteConfig.adsenseSlots[size];
+  const live = Boolean(siteConfig.adsenseClientId && slotId);
+  const pushed = useRef(false);
+
+  useEffect(() => {
+    if (!live || pushed.current) return;
+    pushed.current = true;
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch {
+      // AdSense script not loaded yet (blocked, ad blocker, or still
+      // fetching) — nothing to recover from client-side, the <ins> just
+      // stays empty.
+    }
+  }, [live]);
+
+  if (live) {
+    return (
+      <ins
+        className={`adsbygoogle block ${className}`}
+        style={{ display: "block", minHeight: spec.h }}
+        data-ad-client={siteConfig.adsenseClientId}
+        data-ad-slot={slotId}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    );
+  }
+
   return (
     <div
       data-ad-slot={size}

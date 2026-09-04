@@ -8,6 +8,7 @@ import {
   isSupportedLevel,
   levelLabel,
 } from "@/lib/data";
+import { getLevelNote } from "@/lib/level-notes";
 import { BaseCategory, HallType, SortOption } from "@/lib/types";
 import BaseCard from "@/components/BaseCard";
 import FilterBar from "@/components/FilterBar";
@@ -70,7 +71,7 @@ export default async function LevelPage(props: PageProps<"/[hall]/[level]">) {
         </Link>{" "}
         / {levelLabel(hallType, levelNum)}
       </nav>
-      <h1 className="mb-6 text-2xl font-bold text-slate-100">
+      <h1 className="mb-3 text-2xl font-bold text-slate-100">
         {levelLabel(hallType, levelNum)} Base Layouts
         {result.total > 0 && (
           <span className="ml-2 text-base font-normal text-slate-500">
@@ -78,6 +79,12 @@ export default async function LevelPage(props: PageProps<"/[hall]/[level]">) {
           </span>
         )}
       </h1>
+
+      {getLevelNote(hallType, levelNum) && (
+        <p className="mb-6 max-w-3xl text-sm leading-relaxed text-slate-400">
+          {getLevelNote(hallType, levelNum)}
+        </p>
+      )}
 
       {result.total === 0 && category === "all" ? (
         <div className="rounded-lg border border-dashed border-slate-800 bg-slate-900/40 p-8 text-center">

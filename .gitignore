@@ -30,11 +30,17 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (can opt-in for committing if needed) — .env.example is the
+# template and stays tracked so the repo documents which vars exist
 .env*
+!.env.example
 
 # vercel
 .vercel
+
+# runtime rating/view data (see lib/ratings-store.ts) — regenerated per
+# deployment, not part of the source dataset
+/data/ratings.json
 
 # typescript
 *.tsbuildinfo
